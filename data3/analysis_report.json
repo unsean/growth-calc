@@ -1,0 +1,236 @@
+{
+  "risk_distribution": {
+    "rule_based": {
+      "medium": {
+        "count": 78766,
+        "percentage": 78.766
+      },
+      "low": {
+        "count": 15415,
+        "percentage": 15.415000000000001
+      },
+      "high": {
+        "count": 5819,
+        "percentage": 5.819
+      }
+    },
+    "ml_based": {
+      "high": {
+        "count": 51425,
+        "percentage": 51.425
+      },
+      "medium": {
+        "count": 30505,
+        "percentage": 30.505
+      },
+      "low": {
+        "count": 18070,
+        "percentage": 18.07
+      }
+    }
+  },
+  "demographic_analysis": {
+    "by_age_group": {
+      "high": {
+        "0-6mo": 6.869785397036238,
+        "6-12mo": 6.103051525762881,
+        "12-24mo": 5.170221193737361,
+        "24-60mo": 5.5639858371269595
+      },
+      "low": {
+        "0-6mo": 15.113527873479724,
+        "6-12mo": 15.436885109221276,
+        "12-24mo": 15.704546875977234,
+        "24-60mo": 13.60647445624684
+      },
+      "medium": {
+        "0-6mo": 78.01668672948404,
+        "6-12mo": 78.46006336501584,
+        "12-24mo": 79.1252319302854,
+        "24-60mo": 80.82953970662619
+      }
+    },
+    "by_gender": {
+      "high": {
+        "Female": 5.698400272977259,
+        "Male": 5.938739313258534
+      },
+      "low": {
+        "Female": 15.509524096264627,
+        "Male": 15.321150281990475
+      },
+      "medium": {
+        "Female": 78.79207563075812,
+        "Male": 78.740110404751
+      }
+    }
+  },
+  "feature_correlations": {
+    "feature_correlations": {
+      "haz": -0.47673260754068886,
+      "energy_pct_required": -0.3503499928323172,
+      "protein_g_per_kg": -0.20975510563932032,
+      "height_cm": -0.16411900482699807,
+      "waz": -0.1634774692125007,
+      "whz": -0.1634774692125007,
+      "weight_kg": -0.10599663216148422,
+      "bmi": 0.05843227562585551,
+      "age_months": -0.016811696871093094
+    }
+  },
+  "classification_metrics": {
+    "rule_based": {
+      "confusion_matrix": [
+        [
+          9043,
+          9027,
+          0
+        ],
+        [
+          6372,
+          24133,
+          0
+        ],
+        [
+          0,
+          45606,
+          5819
+        ]
+      ],
+      "classification_report": {
+        "Low": {
+          "precision": 0.586636393123581,
+          "recall": 0.500442722744881,
+          "f1-score": 0.5401224428848739,
+          "support": 18070.0
+        },
+        "Medium": {
+          "precision": 0.30638854328009546,
+          "recall": 0.7911162104573021,
+          "f1-score": 0.4417091451528768,
+          "support": 30505.0
+        },
+        "High": {
+          "precision": 1.0,
+          "recall": 0.11315508021390375,
+          "f1-score": 0.20330514988470408,
+          "support": 51425.0
+        },
+        "accuracy": 0.38995,
+        "macro avg": {
+          "precision": 0.6310083121345588,
+          "recall": 0.4682380044720289,
+          "f1-score": 0.3950455793074849,
+          "support": 100000.0
+        },
+        "weighted avg": {
+          "precision": 0.7137190213650242,
+          "recall": 0.38995,
+          "f1-score": 0.33689317348639086,
+          "support": 100000.0
+        }
+      }
+    },
+    "ml_based": {
+      "confusion_matrix": [
+        [
+          18070,
+          0,
+          0
+        ],
+        [
+          0,
+          30505,
+          0
+        ],
+        [
+          0,
+          0,
+          51425
+        ]
+      ],
+      "classification_report": {
+        "Low": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 18070.0
+        },
+        "Medium": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 30505.0
+        },
+        "High": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 51425.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 100000.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 100000.0
+        }
+      }
+    }
+  },
+  "risk_factor_analysis": {
+    "high_vs_low_risk": {
+      "age_months": {
+        "high_risk_mean": 11.098642378415535,
+        "low_risk_mean": 12.00901719104768,
+        "difference": -0.9103748126321456
+      },
+      "weight_kg": {
+        "high_risk_mean": 8.939233545282695,
+        "low_risk_mean": 10.16139474537788,
+        "difference": -1.2221612000951847
+      },
+      "height_cm": {
+        "high_risk_mean": 63.95978690496649,
+        "low_risk_mean": 75.12145313006813,
+        "difference": -11.16166622510164
+      },
+      "bmi": {
+        "high_risk_mean": 21.399458423784704,
+        "low_risk_mean": 17.9182190503126,
+        "difference": 3.4812393734721034
+      },
+      "haz": {
+        "high_risk_mean": -3.1999999999999997,
+        "low_risk_mean": -0.38984755108660396,
+        "difference": -2.8101524489133958
+      },
+      "waz": {
+        "high_risk_mean": -0.21857707509881424,
+        "low_risk_mean": 0.5050275705481674,
+        "difference": -0.7236046456469816
+      },
+      "whz": {
+        "high_risk_mean": -0.21857707509881424,
+        "low_risk_mean": 0.5050275705481674,
+        "difference": -0.7236046456469816
+      },
+      "energy_pct_required": {
+        "high_risk_mean": 84.98711118748926,
+        "low_risk_mean": 102.4995134609147,
+        "difference": -17.512402273425437
+      },
+      "protein_g_per_kg": {
+        "high_risk_mean": 1.0045505291754426,
+        "low_risk_mean": 1.1705138808276057,
+        "difference": -0.16596335165216303
+      }
+    }
+  }
+}

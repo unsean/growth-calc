@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malnutrition Risk Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+            padding: 20px;
+            color: #111827;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        header p {
+            font-size: 1em;
+            color: #00ffcc;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .tab-button {
+            padding: 12px 28px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        .tab-button:hover {
+            border-color: #3498db;
+            color: #3498db;
+            transform: translateY(-2px);
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #111827;
+            font-size: 0.95em;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1em;
+            background: #ffffff;
+            color: #111827;
+            transition: all 0.3s;
+        }
+        
+        input::placeholder, select {
+            color: #9ca3af;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .choice-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .choice-button {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            color: #374151;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .choice-button.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35);
+        }
+
+        .field-hint {
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .primary-button {
+            background: #2563eb;
+            color: #ffffff;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 999px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+        }
+
+        .primary-button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.4);
+        }
+
+        .primary-button:active {
+            transform: translateY(0);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.7);
+        }
+
+        .primary-button:disabled {
+            opacity: 0.7;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            display: none;
+            border: 2px solid;
+        }
+        
+        .result.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .result.low-risk {
+            background: #d4edda;
+            border-color: #28a745;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+        }
+        
+        .result.medium-risk {
+            background: #fff3cd;
+            border-color: #ffc107;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+        }
+        
+        .result.high-risk {
+            background: #f8d7da;
+            border-color: #dc3545;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+        }
+        
+        .risk-level {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .result.low-risk .risk-level {
+            color: #28a745;
+        }
+        
+        .result.medium-risk .risk-level {
+            color: #ff9800;
+        }
+        
+        .result.high-risk .risk-level {
+            color: #dc3545;
+        }
+        
+        .confidence {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .probabilities {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .probability-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .probability-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 0.9em;
+        }
+        
+        .probability-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .recommendations {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #d0e8ff;
+        }
+        
+        .recommendations h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .recommendations ul {
+            list-style: none;
+        }
+        
+        .recommendations li {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+            color: #333;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-upload input[type=file] {
+            display: none;
+        }
+        
+        .file-upload-label {
+            display: block;
+            padding: 24px;
+            background: #f9fafb;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+        
+        .file-upload-label:hover {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            box-shadow: 0 2px 8px rgba(148, 163, 184, 0.35);
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        table th {
+            background: #f9fafb;
+            color: #111827;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+        }
+        
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #111827;
+        }
+        
+        table tr:hover {
+            background: #f3f4f6;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 5px solid #3b82f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box h3 {
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        
+        .info-box p {
+            color: #4b5563;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .probabilities {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+        }
+
+        /* Dashboard-style refinements for light theme */
+        body {
+            background: #f3f4f6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            padding: 18px 4px 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            background: transparent;
+            color: #111827;
+        }
+
+        .app-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.5);
+        }
+
+        .app-logo i {
+            color: #22c55e;
+            font-size: 1.3rem;
+        }
+
+        .app-header h1 {
+            margin: 0 0 4px;
+            font-size: 1.9rem;
+            letter-spacing: 0.02em;
+        }
+
+        .app-header p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #4b5563;
+        }
+
+        .app-header-right {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .tag-soft {
+            background: rgba(15, 23, 42, 0.35);
+            color: #e5e7eb;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+        }
+
+        .tag-soft i {
+            font-size: 0.85rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            padding: 4px;
+            box-shadow: none;
+            gap: 0;
+        }
+
+        .tab-button {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 999px;
+            background: transparent;
+            color: #4b5563;
+            border: none;
+            box-shadow: none;
+            padding: 10px 16px;
+        }
+
+        .tab-button i {
+            font-size: 0.95rem;
+        }
+
+        .tab-button.active {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .tab-content {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .result {
+            border-radius: 14px;
+        }
+
+        .batch-summary {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: #f9fafb;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .risk-counts {
+            display: flex;
+            gap: 14px;
+            font-size: 0.9rem;
+        }
+
+        .risk-counts span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .risk-counts i {
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .tabs {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>Malnutrition Risk Dashboard</h1>
+            <p>Early detection of malnutrition risk in children (0-5 years)</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('single', event)">
+                <i class="fa-solid fa-user"></i>
+                <span>Single Assessment</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('batch', event)">
+                <i class="fa-solid fa-table"></i>
+                <span>Batch Assessments</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('info', event)">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Model Info</span>
+            </button>
+        </div>
+        
+        <!-- Single Prediction Tab -->
+        <div id="single" class="tab-content active">
+            <div class="info-box">
+                <h3>Instructions</h3>
+                <p>Enter the child's information below to get a malnutrition risk assessment. The system will analyze anthropometric data and provide personalized recommendations.</p>
+            </div>
+            
+            <form id="singleForm">
+                <!-- Row 1: Gender + Age -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Gender *</label>
+                        <input type="hidden" id="gender" required>
+                        <div class="choice-row">
+                            <button type="button" class="choice-button gender-choice" data-value="M">
+                                <i class="fa-solid fa-person"></i>
+                                <span>Male (Laki-laki)</span>
+                            </button>
+                            <button type="button" class="choice-button gender-choice" data-value="F">
+                                <i class="fa-solid fa-person-dress"></i>
+                                <span>Female (Perempuan)</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="age">Age (months) *</label>
+                        <input type="number" id="age" min="0" max="60" step="0.1" required>
+                        <p class="field-hint">Allowed range: 0–60 months</p>
+                    </div>
+                </div>
+                
+                <!-- Row 2: Weight + Height -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="weight">Weight (kg) *</label>
+                        <input type="number" id="weight" min="2" max="30" step="0.1" required>
+                        <p class="field-hint">Allowed range: 2–30 kg</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="height">Height (cm) *</label>
+                        <input type="number" id="height" min="40" max="120" step="0.1" required>
+                        <p class="field-hint">Allowed range: 40–120 cm</p>
+                    </div>
+                </div>
+                
+                <!-- Row 3: Nutrition (optional) -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="energy">Daily Energy Intake (kcal)</label>
+                        <input type="number" id="energy" min="0" step="1" placeholder="Optional, e.g. 900">
+                        <p class="field-hint">Optional. If empty, the system uses a default estimate.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="protein">Daily Protein Intake (g)</label>
+                        <input type="number" id="protein" min="0" step="0.1" placeholder="Optional, e.g. 15">
+                        <p class="field-hint">Optional. If empty, the system uses a default estimate.</p>
+                    </div>
+                </div>
+                
+                <button type="submit" class="primary-button">Predict Risk Level</button>
+            </form>
+            
+            <div class="loading" id="singleLoading">
+                <div class="spinner"></div>
+                <p>Analyzing data...</p>
+            </div>
+            
+            <div id="singleResult" class="result"></div>
+        </div>
+        
+        <!-- Batch Prediction Tab -->
+        <div id="batch" class="tab-content">
+            <div class="info-box">
+                <h3>Batch Predictions</h3>
+                <p>Upload a CSV file with multiple children's data to get predictions for all of them at once.</p>
+                <p><strong>CSV Format:</strong> Gender, Age_months, Weight_kg, Height_cm, Energy_kcal(optional), Protein_g(optional)</p>
+            </div>
+            
+            <div class="file-upload">
+                <input type="file" id="csvFile" accept=".csv">
+                <label for="csvFile" class="file-upload-label">
+                    Click to upload CSV file or drag and drop
+                </label>
+                <div class="file-name" id="fileName"></div>
+            </div>
+            
+            <button class="primary-button" onclick="uploadBatch()" style="margin-top: 20px;">Process Batch</button>
+            
+            <div class="loading" id="batchLoading">
+                <div class="spinner"></div>
+                <p>Processing predictions...</p>
+            </div>
+            
+            <div id="batchResult"></div>
+        </div>
+        
+        <!-- Model Info Tab -->
+        <div id="info" class="tab-content">
+            <div class="info-box">
+                <h3>Model Information</h3>
+                <p>Details about the trained malnutrition detection model.</p>
+            </div>
+            
+            <div id="modelInfo"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab switching
+        function switchTab(tabName, event) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active from buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            
+            // Load model info if info tab
+            if (tabName === 'info') {
+                loadModelInfo();
+            }
+        }
+        
+        // Gender selection toggle
+        const genderInput = document.getElementById('gender');
+        const genderButtons = document.querySelectorAll('.gender-choice');
+        genderButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                genderButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if (genderInput) {
+                    genderInput.value = btn.dataset.value || '';
+                }
+            });
+        });
+
+        // Single prediction
+        document.getElementById('singleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const gender = document.getElementById('gender').value;
+            const age = parseFloat(document.getElementById('age').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const energy = parseFloat(document.getElementById('energy').value);
+            const protein = parseFloat(document.getElementById('protein').value);
+            
+            console.log('Form submitted:', {gender, age, weight, height});
+            
+            document.getElementById('singleLoading').style.display = 'block';
+            document.getElementById('singleResult').innerHTML = '';
+            
+            try {
+                const payload = {
+                    gender: gender,
+                    age_months: age,
+                    weight_kg: weight,
+                    height_cm: height,
+                    energy_intake_kcal: isNaN(energy) ? 900 : energy,
+                    protein_intake_g: isNaN(protein) ? 15 : protein
+                };
+                
+                console.log('Sending payload:', payload);
+                
+                const response = await fetch('/api/assess', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                console.log('Response status:', response.status);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.status === 'success') {
+                    displaySingleResult(data);
+                } else if (response.ok) {
+                    // Response is OK but status might not be 'success'
+                    displaySingleResult(data);
+                } else {
+                    showError('singleResult', data.error || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('singleResult', 'Error: ' + error.message);
+            } finally {
+                document.getElementById('singleLoading').style.display = 'none';
+            }
+        });
+        
+        // Helper function to format recommendation/interpretation text with proper line breaks
+        function formatTextWithBullets(text) {
+            if (!text) return '';
+            
+            // Split by bullet points and format as HTML list
+            let formatted = text;
+            
+            // Check if text contains bullet points
+            if (formatted.includes('•')) {
+                // Split into parts: before bullets and bullet items
+                const parts = formatted.split(/(?=•)/);
+                let html = '';
+                let hasStartedList = false;
+                
+                parts.forEach(part => {
+                    part = part.trim();
+                    if (part.startsWith('•')) {
+                        if (!hasStartedList) {
+                            html += '<ul style="margin: 8px 0 8px 0; padding-left: 20px; list-style: none;">';
+                            hasStartedList = true;
+                        }
+                        html += `<li style="margin-bottom: 6px; position: relative; padding-left: 16px;"><span style="position: absolute; left: 0; color: #3b82f6;">•</span>${part.substring(1).trim()}</li>`;
+                    } else if (part) {
+                        if (hasStartedList) {
+                            html += '</ul>';
+                            hasStartedList = false;
+                        }
+                        // Check for section headers (all caps with colon)
+                        if (/^[A-Z\s]+:/.test(part)) {
+                            html += `<div style="font-weight: 600; margin-top: 12px; margin-bottom: 6px; color: #1e3a8a;">${part}</div>`;
+                        } else {
+                            html += `<div style="margin-bottom: 8px;">${part}</div>`;
+                        }
+                    }
+                });
+                
+                if (hasStartedList) {
+                    html += '</ul>';
+                }
+                
+                return html;
+            }
+            
+            // No bullets, just return with basic paragraph formatting
+            return `<div>${formatted}</div>`;
+        }
+
+        function displaySingleResult(data) {
+            try {
+                console.log('displaySingleResult called with:', data);
+                
+                const riskLevel = data.assessment.risk_level.toUpperCase();
+                const confidence = data.assessment.confidence || 0;
+                const recommendation = data.recommendation || 'No recommendation available';
+                const interpretation = data.interpretation || '';
+                const metrics = data.metrics || {};
+                const explanation = data.assessment.explanation || {};
+                const gender = data.metrics.gender || 'M';
+                
+                const riskColor = riskLevel === 'LOW' ? '#10b981' : riskLevel === 'MEDIUM' ? '#f59e0b' : '#ef4444';
+                const riskBg = riskLevel === 'LOW' ? '#d1fae5' : riskLevel === 'MEDIUM' ? '#fef3c7' : '#fee2e2';
+                const zscoreColor = (val) => val < -3 ? '#dc2626' : val < -2 ? '#f59e0b' : '#10b981';
+                const zscoreLabel = (val) => val < -3 ? 'Severe' : val < -2 ? 'Moderate' : 'Normal';
+
+                // Build risk indicators HTML
+                let indicatorsHtml = '';
+                if (explanation) {
+                    const allIndicators = [
+                        ...(explanation.severe_indicators || []).map(i => ({ text: i, type: 'severe' })),
+                        ...(explanation.moderate_indicators || []).map(i => ({ text: i, type: 'moderate' })),
+                        ...(explanation.nutrition_indicators || []).map(i => ({ text: i, type: 'nutrition' }))
+                    ];
+                    if (allIndicators.length > 0) {
+                        indicatorsHtml = `
+                            <div style="margin-top: 16px;">
+                                <div style="font-weight: 600; color: #374151; margin-bottom: 8px; font-size: 0.9em;">
+                                    <i class="fa-solid fa-flag" style="color: #6b7280;"></i> Risk Indicators
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    ${allIndicators.map(ind => `
+                                        <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 0.8em; background: ${ind.type === 'severe' ? '#fee2e2' : ind.type === 'moderate' ? '#fef3c7' : '#eff6ff'}; color: ${ind.type === 'severe' ? '#dc2626' : ind.type === 'moderate' ? '#d97706' : '#2563eb'};">
+                                            <i class="fa-solid ${ind.type === 'severe' ? 'fa-exclamation-triangle' : ind.type === 'moderate' ? 'fa-exclamation-circle' : 'fa-utensils'}"></i>
+                                            ${ind.text}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                const html = `
+                <div style="margin-top: 24px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 24px;">
+                    <!-- Risk Badge & Basic Info -->
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="width: 56px; height: 56px; border-radius: 50%; background: ${riskBg}; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid ${gender === 'M' ? 'fa-person' : 'fa-person-dress'}" style="font-size: 1.5em; color: ${gender === 'M' ? '#3b82f6' : '#ec4899'};"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 1.2em; font-weight: 700; color: #111827;">Assessment Result</div>
+                                <div style="color: #6b7280; font-size: 0.9em;">${gender === 'M' ? 'Male' : 'Female'} • ${metrics.age_months} months old</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="padding: 8px 20px; border-radius: 999px; background: ${riskBg}; color: ${riskColor}; font-weight: 700; font-size: 1.1em; letter-spacing: 0.05em;">${riskLevel} RISK</span>
+                            <span style="padding: 8px 14px; border-radius: 999px; background: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.9em;">${confidence}% conf.</span>
+                        </div>
+                    </div>
+
+                    <!-- Input Data Section -->
+                    <div style="margin-top: 20px; padding: 16px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                        <div style="font-weight: 600; color: #374151; margin-bottom: 12px; font-size: 0.9em;">
+                            <i class="fa-solid fa-clipboard-list" style="color: #6b7280;"></i> Input Data
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Weight</div>
+                                <div style="font-size: 1.3em; font-weight: 700; color: #111827;">${metrics.weight_kg} <span style="font-size: 0.6em; font-weight: 400;">kg</span></div>
+                            </div>
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Height</div>
+                                <div style="font-size: 1.3em; font-weight: 700; color: #111827;">${metrics.height_cm} <span style="font-size: 0.6em; font-weight: 400;">cm</span></div>
+                            </div>
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Energy Intake</div>
+                                <div style="font-size: 1.3em; font-weight: 700; color: #111827;">${metrics.energy_intake_kcal || 'N/A'} <span style="font-size: 0.6em; font-weight: 400;">kcal</span></div>
+                            </div>
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Protein Intake</div>
+                                <div style="font-size: 1.3em; font-weight: 700; color: #111827;">${metrics.protein_intake_g || 'N/A'} <span style="font-size: 0.6em; font-weight: 400;">g</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Z-Scores Section -->
+                    <div style="margin-top: 16px; padding: 16px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                        <div style="font-weight: 600; color: #374151; margin-bottom: 12px; font-size: 0.9em;">
+                            <i class="fa-solid fa-chart-line" style="color: #6b7280;"></i> Z-Scores (WHO Standards)
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                            <div style="background: white; padding: 14px; border-radius: 10px; border-left: 4px solid ${zscoreColor(metrics.haz)};">
+                                <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">HAZ (Height-for-Age)</div>
+                                <div style="font-size: 1.5em; font-weight: 700; color: ${zscoreColor(metrics.haz)};">${metrics.haz}</div>
+                                <div style="font-size: 0.8em; color: ${zscoreColor(metrics.haz)};">${zscoreLabel(metrics.haz)}</div>
+                            </div>
+                            <div style="background: white; padding: 14px; border-radius: 10px; border-left: 4px solid ${zscoreColor(metrics.waz)};">
+                                <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">WAZ (Weight-for-Age)</div>
+                                <div style="font-size: 1.5em; font-weight: 700; color: ${zscoreColor(metrics.waz)};">${metrics.waz}</div>
+                                <div style="font-size: 0.8em; color: ${zscoreColor(metrics.waz)};">${zscoreLabel(metrics.waz)}</div>
+                            </div>
+                            <div style="background: white; padding: 14px; border-radius: 10px; border-left: 4px solid ${zscoreColor(metrics.whz)};">
+                                <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">WHZ (Weight-for-Height)</div>
+                                <div style="font-size: 1.5em; font-weight: 700; color: ${zscoreColor(metrics.whz)};">${metrics.whz}</div>
+                                <div style="font-size: 0.8em; color: ${zscoreColor(metrics.whz)};">${zscoreLabel(metrics.whz)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Metrics -->
+                    <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                        <div style="background: #f9fafb; padding: 14px; border-radius: 10px; border: 1px solid #e5e7eb; text-align: center;">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase;">BMI</div>
+                            <div style="font-size: 1.4em; font-weight: 700; color: #111827;">${metrics.bmi}</div>
+                        </div>
+                        <div style="background: #f9fafb; padding: 14px; border-radius: 10px; border: 1px solid #e5e7eb; text-align: center;">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase;">Energy %</div>
+                            <div style="font-size: 1.4em; font-weight: 700; color: ${metrics.energy_pct < 70 ? '#dc2626' : metrics.energy_pct < 90 ? '#f59e0b' : '#10b981'};">${metrics.energy_pct}%</div>
+                        </div>
+                        <div style="background: #f9fafb; padding: 14px; border-radius: 10px; border: 1px solid #e5e7eb; text-align: center;">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase;">Protein g/kg</div>
+                            <div style="font-size: 1.4em; font-weight: 700; color: ${metrics.protein_g_per_kg < 0.9 ? '#dc2626' : metrics.protein_g_per_kg < 1.1 ? '#f59e0b' : '#10b981'};">${metrics.protein_g_per_kg}</div>
+                        </div>
+                    </div>
+
+                    ${indicatorsHtml}
+
+                    <!-- Recommendation -->
+                    <div style="margin-top: 16px; padding: 16px; background: #eff6ff; border-radius: 10px; border: 1px solid #bfdbfe;">
+                        <div style="font-weight: 600; color: #1e40af; margin-bottom: 8px; font-size: 0.9em;">
+                            <i class="fa-solid fa-lightbulb" style="color: #3b82f6;"></i> Recommendation
+                        </div>
+                        <div style="margin: 0; color: #1e3a8a; line-height: 1.6; font-size: 0.95em;">${formatTextWithBullets(recommendation)}</div>
+                    </div>
+
+                    <!-- Interpretation -->
+                    ${interpretation ? `
+                    <div style="margin-top: 12px; padding: 12px 16px; background: #f3f4f6; border-radius: 8px; border-left: 4px solid ${riskColor};">
+                        <div style="color: #374151; font-size: 0.9em; line-height: 1.5;"><strong>Interpretation:</strong> ${formatTextWithBullets(interpretation)}</div>
+                    </div>
+                    ` : ''}
+                </div>
+                `;
+                
+                console.log('Setting innerHTML...');
+                const resultDiv = document.getElementById('singleResult');
+                resultDiv.innerHTML = html;
+                resultDiv.style.display = 'block';
+                console.log('Result displayed successfully!');
+            } catch (error) {
+                console.error('Error in displaySingleResult:', error);
+                showError('singleResult', 'Error displaying result: ' + error.message);
+            }
+        }
+        
+        document.getElementById('csvFile').addEventListener('change', (e) => {
+            const fileName = e.target.files[0]?.name || '';
+            document.getElementById('fileName').innerHTML = fileName
+                ? `<i class="fa-solid fa-file-csv"></i> ${fileName}`
+                : '';
+        });
+        
+        // Batch upload
+        async function uploadBatch() {
+            const file = document.getElementById('csvFile').files[0];
+            
+            if (!file) {
+                showError('batchResult', 'Please select a CSV file');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            document.getElementById('batchLoading').style.display = 'block';
+            document.getElementById('batchResult').innerHTML = '';
+            
+            try {
+                const response = await fetch('/batch', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                console.log('Batch response:', data);
+                
+                if (data.success) {
+                    console.log('Predictions:', data.predictions);
+                    displayBatchResult(data);
+                } else {
+                    showError('batchResult', data.error);
+                }
+            } catch (error) {
+                showError('batchResult', 'Error: ' + error.message);
+            } finally {
+                document.getElementById('batchLoading').style.display = 'none';
+            }
+        }
+        
+        // Global state for batch navigation
+        let batchPredictions = [];
+        let currentBatchIndex = 0;
+
+        function displayBatchResult(data) {
+            if (!data.predictions || data.predictions.length === 0) {
+                document.getElementById('batchResult').innerHTML = '<div class="error">No predictions returned</div>';
+                return;
+            }
+
+            // Store predictions globally for navigation
+            batchPredictions = data.predictions.filter(p => !p.error);
+            currentBatchIndex = 0;
+
+            let lowRiskCount = 0;
+            let mediumRiskCount = 0;
+            let highRiskCount = 0;
+            let errorCount = 0;
+
+            data.predictions.forEach(pred => {
+                if (pred.error) { errorCount++; return; }
+                if (pred.risk_level === 'LOW') lowRiskCount++;
+                else if (pred.risk_level === 'MEDIUM') mediumRiskCount++;
+                else if (pred.risk_level === 'HIGH') highRiskCount++;
+            });
+
+            // Calculate percentages for visual bar
+            const total = lowRiskCount + mediumRiskCount + highRiskCount;
+            const lowPct = total > 0 ? (lowRiskCount / total * 100).toFixed(1) : 0;
+            const medPct = total > 0 ? (mediumRiskCount / total * 100).toFixed(1) : 0;
+            const highPct = total > 0 ? (highRiskCount / total * 100).toFixed(1) : 0;
+
+            let html = `
+                <div style="margin-top: 24px;">
+                    <!-- Summary Header -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                        <h3 style="color: #10b981; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-circle-check"></i>
+                            Processed ${data.predictions.length} children
+                            ${errorCount > 0 ? `<span style="color: #ef4444; font-size: 0.85em;">(${errorCount} errors)</span>` : ''}
+                        </h3>
+                    </div>
+
+                    <!-- Visual Summary Cards -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+                        <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #6ee7b7;">
+                            <div style="font-size: 2.5em; font-weight: 700; color: #059669;">${lowRiskCount}</div>
+                            <div style="font-size: 0.9em; color: #047857; font-weight: 600;">Low Risk</div>
+                            <div style="font-size: 0.8em; color: #065f46;">${lowPct}%</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #fbbf24;">
+                            <div style="font-size: 2.5em; font-weight: 700; color: #d97706;">${mediumRiskCount}</div>
+                            <div style="font-size: 0.9em; color: #b45309; font-weight: 600;">Medium Risk</div>
+                            <div style="font-size: 0.8em; color: #92400e;">${medPct}%</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #f87171;">
+                            <div style="font-size: 2.5em; font-weight: 700; color: #dc2626;">${highRiskCount}</div>
+                            <div style="font-size: 0.9em; color: #b91c1c; font-weight: 600;">High Risk</div>
+                            <div style="font-size: 0.8em; color: #991b1b;">${highPct}%</div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Distribution Bar -->
+                    <div style="background: #f3f4f6; border-radius: 999px; height: 12px; overflow: hidden; margin-bottom: 24px;">
+                        <div style="display: flex; height: 100%;">
+                            <div style="width: ${lowPct}%; background: #10b981;"></div>
+                            <div style="width: ${medPct}%; background: #f59e0b;"></div>
+                            <div style="width: ${highPct}%; background: #ef4444;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed View Navigation -->
+                    ${batchPredictions.length > 0 ? `
+                    <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 24px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <h4 style="margin: 0; color: #111827; font-size: 1.1em;">
+                                <i class="fa-solid fa-user-check" style="color: #3b82f6; margin-right: 8px;"></i>
+                                Detailed View
+                            </h4>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <button onclick="navigateBatch(-1)" style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f9fafb'">
+                                    <i class="fa-solid fa-chevron-up"></i>
+                                </button>
+                                <span id="batchNavCounter" style="font-weight: 600; color: #374151; min-width: 60px; text-align: center;">1 / ${batchPredictions.length}</span>
+                                <button onclick="navigateBatch(1)" style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f9fafb'">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="batchDetailView"></div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Data Table -->
+                    <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden;">
+                        <div style="padding: 16px 20px; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                            <h4 style="margin: 0; color: #111827; font-size: 1em;">
+                                <i class="fa-solid fa-table" style="color: #6b7280; margin-right: 8px;"></i>
+                                All Results
+                            </h4>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                                <thead>
+                                    <tr style="background: #f9fafb;">
+                                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">#</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Gender</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Age</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Weight</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Height</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">HAZ</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">WAZ</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">WHZ</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Risk</th>
+                                        <th style="padding: 12px 16px; text-align: center; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">View</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+            data.predictions.forEach((pred, idx) => {
+                if (pred.error) {
+                    html += `<tr style="background: #fef2f2;"><td colspan="10" style="padding: 12px 16px; color: #dc2626;"><i class="fa-solid fa-exclamation-circle"></i> Error: ${pred.error}</td></tr>`;
+                    return;
+                }
+
+                const riskColor = pred.risk_level === 'LOW' ? '#10b981' : pred.risk_level === 'MEDIUM' ? '#f59e0b' : '#ef4444';
+                const riskBg = pred.risk_level === 'LOW' ? '#d1fae5' : pred.risk_level === 'MEDIUM' ? '#fef3c7' : '#fee2e2';
+                const zscoreColor = (val) => val < -3 ? '#dc2626' : val < -2 ? '#f59e0b' : '#10b981';
+
+                html += `
+                    <tr style="cursor: pointer; transition: background 0.2s;" onclick="jumpToBatchItem(${batchPredictions.indexOf(pred)})" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6; color: #6b7280;">${idx + 1}</td>
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid ${pred.gender === 'M' ? 'fa-person' : 'fa-person-dress'}" style="color: ${pred.gender === 'M' ? '#3b82f6' : '#ec4899'};"></i>
+                                ${pred.gender === 'M' ? 'Male' : 'Female'}
+                            </span>
+                        </td>
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6;">${pred.age_months} mo</td>
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6;">${pred.weight_kg} kg</td>
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6;">${pred.height_cm} cm</td>
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6;"><span style="color: ${zscoreColor(pred.haz)}; font-weight: 600;">${pred.haz}</span></td>
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6;"><span style="color: ${zscoreColor(pred.waz)}; font-weight: 600;">${pred.waz}</span></td>
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6;"><span style="color: ${zscoreColor(pred.whz)}; font-weight: 600;">${pred.whz}</span></td>
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6;">
+                            <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; background: ${riskBg}; color: ${riskColor}; font-weight: 600; font-size: 0.85em;">${pred.risk_level}</span>
+                        </td>
+                        <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6; text-align: center;">
+                            <button onclick="event.stopPropagation(); jumpToBatchItem(${batchPredictions.indexOf(pred)})" style="width: 32px; height: 32px; border-radius: 6px; border: none; background: #eff6ff; color: #3b82f6; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+
+            html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>`;
+
+            document.getElementById('batchResult').innerHTML = html;
+            
+            // Show first item in detail view
+            if (batchPredictions.length > 0) {
+                updateBatchDetailView();
+            }
+        }
+
+        function navigateBatch(direction) {
+            if (batchPredictions.length === 0) return;
+            currentBatchIndex = (currentBatchIndex + direction + batchPredictions.length) % batchPredictions.length;
+            updateBatchDetailView();
+        }
+
+        function jumpToBatchItem(index) {
+            if (index < 0 || index >= batchPredictions.length) return;
+            currentBatchIndex = index;
+            updateBatchDetailView();
+            // Scroll to detail view
+            document.getElementById('batchDetailView').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function updateBatchDetailView() {
+            if (batchPredictions.length === 0) return;
+            
+            const pred = batchPredictions[currentBatchIndex];
+            const counter = document.getElementById('batchNavCounter');
+            if (counter) counter.textContent = `${currentBatchIndex + 1} / ${batchPredictions.length}`;
+
+            const riskColor = pred.risk_level === 'LOW' ? '#10b981' : pred.risk_level === 'MEDIUM' ? '#f59e0b' : '#ef4444';
+            const riskBg = pred.risk_level === 'LOW' ? '#d1fae5' : pred.risk_level === 'MEDIUM' ? '#fef3c7' : '#fee2e2';
+            const zscoreColor = (val) => val < -3 ? '#dc2626' : val < -2 ? '#f59e0b' : '#10b981';
+            const zscoreLabel = (val) => val < -3 ? 'Severe' : val < -2 ? 'Moderate' : 'Normal';
+
+            let indicatorsHtml = '';
+            if (pred.explanation) {
+                const allIndicators = [
+                    ...pred.explanation.severe_indicators.map(i => ({ text: i, type: 'severe' })),
+                    ...pred.explanation.moderate_indicators.map(i => ({ text: i, type: 'moderate' })),
+                    ...pred.explanation.nutrition_indicators.map(i => ({ text: i, type: 'nutrition' }))
+                ];
+                if (allIndicators.length > 0) {
+                    indicatorsHtml = `
+                        <div style="margin-top: 16px;">
+                            <div style="font-weight: 600; color: #374151; margin-bottom: 8px; font-size: 0.9em;">
+                                <i class="fa-solid fa-flag" style="color: #6b7280;"></i> Risk Indicators
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${allIndicators.map(ind => `
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 0.8em; background: ${ind.type === 'severe' ? '#fee2e2' : ind.type === 'moderate' ? '#fef3c7' : '#eff6ff'}; color: ${ind.type === 'severe' ? '#dc2626' : ind.type === 'moderate' ? '#d97706' : '#2563eb'};">
+                                        <i class="fa-solid ${ind.type === 'severe' ? 'fa-exclamation-triangle' : ind.type === 'moderate' ? 'fa-exclamation-circle' : 'fa-utensils'}"></i>
+                                        ${ind.text}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            const html = `
+                <!-- Risk Badge & Basic Info -->
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="width: 56px; height: 56px; border-radius: 50%; background: ${riskBg}; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid ${pred.gender === 'M' ? 'fa-person' : 'fa-person-dress'}" style="font-size: 1.5em; color: ${pred.gender === 'M' ? '#3b82f6' : '#ec4899'};"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 1.2em; font-weight: 700; color: #111827;">Child #${currentBatchIndex + 1}</div>
+                            <div style="color: #6b7280; font-size: 0.9em;">${pred.gender === 'M' ? 'Male' : 'Female'} • ${pred.age_months} months old</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="padding: 8px 20px; border-radius: 999px; background: ${riskBg}; color: ${riskColor}; font-weight: 700; font-size: 1.1em; letter-spacing: 0.05em;">${pred.risk_level} RISK</span>
+                        <span style="padding: 8px 14px; border-radius: 999px; background: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.9em;">${pred.confidence}% conf.</span>
+                    </div>
+                </div>
+
+                <!-- Input Data Section -->
+                <div style="margin-top: 20px; padding: 16px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                    <div style="font-weight: 600; color: #374151; margin-bottom: 12px; font-size: 0.9em;">
+                        <i class="fa-solid fa-clipboard-list" style="color: #6b7280;"></i> Input Data
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Weight</div>
+                            <div style="font-size: 1.3em; font-weight: 700; color: #111827;">${pred.weight_kg} <span style="font-size: 0.6em; font-weight: 400;">kg</span></div>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Height</div>
+                            <div style="font-size: 1.3em; font-weight: 700; color: #111827;">${pred.height_cm} <span style="font-size: 0.6em; font-weight: 400;">cm</span></div>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Energy Intake</div>
+                            <div style="font-size: 1.3em; font-weight: 700; color: #111827;">${pred.energy_intake_kcal || 'N/A'} <span style="font-size: 0.6em; font-weight: 400;">kcal</span></div>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Protein Intake</div>
+                            <div style="font-size: 1.3em; font-weight: 700; color: #111827;">${pred.protein_intake_g || 'N/A'} <span style="font-size: 0.6em; font-weight: 400;">g</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Z-Scores Section -->
+                <div style="margin-top: 16px; padding: 16px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                    <div style="font-weight: 600; color: #374151; margin-bottom: 12px; font-size: 0.9em;">
+                        <i class="fa-solid fa-chart-line" style="color: #6b7280;"></i> Z-Scores (WHO Standards)
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                        <div style="background: white; padding: 14px; border-radius: 10px; border-left: 4px solid ${zscoreColor(pred.haz)};">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">HAZ (Height-for-Age)</div>
+                            <div style="font-size: 1.5em; font-weight: 700; color: ${zscoreColor(pred.haz)};">${pred.haz}</div>
+                            <div style="font-size: 0.8em; color: ${zscoreColor(pred.haz)};">${zscoreLabel(pred.haz)}</div>
+                        </div>
+                        <div style="background: white; padding: 14px; border-radius: 10px; border-left: 4px solid ${zscoreColor(pred.waz)};">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">WAZ (Weight-for-Age)</div>
+                            <div style="font-size: 1.5em; font-weight: 700; color: ${zscoreColor(pred.waz)};">${pred.waz}</div>
+                            <div style="font-size: 0.8em; color: ${zscoreColor(pred.waz)};">${zscoreLabel(pred.waz)}</div>
+                        </div>
+                        <div style="background: white; padding: 14px; border-radius: 10px; border-left: 4px solid ${zscoreColor(pred.whz)};">
+                            <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">WHZ (Weight-for-Height)</div>
+                            <div style="font-size: 1.5em; font-weight: 700; color: ${zscoreColor(pred.whz)};">${pred.whz}</div>
+                            <div style="font-size: 0.8em; color: ${zscoreColor(pred.whz)};">${zscoreLabel(pred.whz)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Metrics -->
+                <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                    <div style="background: #f9fafb; padding: 14px; border-radius: 10px; border: 1px solid #e5e7eb; text-align: center;">
+                        <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase;">BMI</div>
+                        <div style="font-size: 1.4em; font-weight: 700; color: #111827;">${pred.bmi}</div>
+                    </div>
+                    <div style="background: #f9fafb; padding: 14px; border-radius: 10px; border: 1px solid #e5e7eb; text-align: center;">
+                        <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase;">Energy %</div>
+                        <div style="font-size: 1.4em; font-weight: 700; color: ${pred.energy_pct < 70 ? '#dc2626' : pred.energy_pct < 90 ? '#f59e0b' : '#10b981'};">${pred.energy_pct}%</div>
+                    </div>
+                    <div style="background: #f9fafb; padding: 14px; border-radius: 10px; border: 1px solid #e5e7eb; text-align: center;">
+                        <div style="font-size: 0.75em; color: #6b7280; text-transform: uppercase;">Protein g/kg</div>
+                        <div style="font-size: 1.4em; font-weight: 700; color: ${pred.protein_g_per_kg < 0.9 ? '#dc2626' : pred.protein_g_per_kg < 1.1 ? '#f59e0b' : '#10b981'};">${pred.protein_g_per_kg}</div>
+                    </div>
+                </div>
+
+                ${indicatorsHtml}
+
+                <!-- Recommendation -->
+                <div style="margin-top: 16px; padding: 16px; background: #eff6ff; border-radius: 10px; border: 1px solid #bfdbfe;">
+                    <div style="font-weight: 600; color: #1e40af; margin-bottom: 8px; font-size: 0.9em;">
+                        <i class="fa-solid fa-lightbulb" style="color: #3b82f6;"></i> Recommendation
+                    </div>
+                    <div style="margin: 0; color: #1e3a8a; line-height: 1.6; font-size: 0.95em;">${formatTextWithBullets(pred.recommendation || 'No recommendation available')}</div>
+                </div>
+
+                <!-- Interpretation -->
+                ${pred.interpretation ? `
+                <div style="margin-top: 12px; padding: 12px 16px; background: #f3f4f6; border-radius: 8px; border-left: 4px solid ${riskColor};">
+                    <div style="color: #374151; font-size: 0.9em; line-height: 1.5;"><strong>Interpretation:</strong> ${formatTextWithBullets(pred.interpretation)}</div>
+                </div>
+                ` : ''}
+            `;
+
+            document.getElementById('batchDetailView').innerHTML = html;
+        }
+        
+        // Load model info
+        async function loadModelInfo() {
+            try {
+                const response = await fetch('/info');
+                const data = await response.json();
+
+                const trainingSamples = (data && typeof data.training_samples === 'number')
+                    ? data.training_samples.toLocaleString()
+                    : 'N/A';
+                const testingSamples = (data && typeof data.testing_samples === 'number')
+                    ? data.testing_samples.toLocaleString()
+                    : 'N/A';
+                const classes = (data && Array.isArray(data.classes))
+                    ? data.classes
+                    : ['N/A'];
+
+                const errorHtml = data && data.error
+                    ? `<div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 12px; margin-bottom: 16px; color: #92400e; font-size: 0.9em;"><i class="fa-solid fa-exclamation-triangle" style="margin-right: 8px;"></i>${data.error}</div>`
+                    : '';
+
+                const html = `
+                    ${errorHtml}
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                        <!-- Training Data Card -->
+                        <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 24px;">
+                            <h3 style="margin: 0 0 20px 0; color: #111827; font-size: 1.1em; display: flex; align-items: center; gap: 10px;">
+                                <span style="width: 36px; height: 36px; border-radius: 10px; background: #f0fdf4; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa-solid fa-database" style="color: #10b981;"></i>
+                                </span>
+                                Training Data
+                            </h3>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                                <div style="background: #f9fafb; border-radius: 10px; padding: 16px; text-align: center; border: 1px solid #e5e7eb;">
+                                    <div style="font-size: 1.8em; font-weight: 700; color: #3b82f6;">${trainingSamples}</div>
+                                    <div style="font-size: 0.8em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Training Samples</div>
+                                </div>
+                                <div style="background: #f9fafb; border-radius: 10px; padding: 16px; text-align: center; border: 1px solid #e5e7eb;">
+                                    <div style="font-size: 1.8em; font-weight: 700; color: #8b5cf6;">${testingSamples}</div>
+                                    <div style="font-size: 0.8em; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Testing Samples</div>
+                                </div>
+                            </div>
+                            
+                            <div style="background: #f9fafb; border-radius: 10px; padding: 16px; border: 1px solid #e5e7eb; margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600; color: #374151;">Features</span>
+                                    <span style="font-weight: 700; color: #111827; font-size: 1.2em;">${data && typeof data.features === 'number' ? data.features : 'N/A'}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="background: #f9fafb; border-radius: 10px; padding: 16px; border: 1px solid #e5e7eb;">
+                                <div style="font-weight: 600; color: #374151; margin-bottom: 10px;">Risk Classes</div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    ${classes.map(c => {
+                                        const color = c.toLowerCase() === 'low' ? '#10b981' : c.toLowerCase() === 'medium' ? '#f59e0b' : c.toLowerCase() === 'high' ? '#ef4444' : '#6b7280';
+                                        const bg = c.toLowerCase() === 'low' ? '#d1fae5' : c.toLowerCase() === 'medium' ? '#fef3c7' : c.toLowerCase() === 'high' ? '#fee2e2' : '#f3f4f6';
+                                        return `<span style="display: inline-block; padding: 6px 14px; border-radius: 999px; background: ${bg}; color: ${color}; font-weight: 600; font-size: 0.85em; text-transform: capitalize;">${c}</span>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Info about Z-Score thresholds -->
+                    <div style="margin-top: 20px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 24px;">
+                        <h3 style="margin: 0 0 16px 0; color: #111827; font-size: 1.1em; display: flex; align-items: center; gap: 10px;">
+                            <span style="width: 36px; height: 36px; border-radius: 10px; background: #fef3c7; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid fa-ruler" style="color: #f59e0b;"></i>
+                            </span>
+                            WHO Z-Score Thresholds
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                            <div style="background: #d1fae5; border-radius: 8px; padding: 14px; border-left: 4px solid #10b981;">
+                                <div style="font-weight: 600; color: #065f46;">Normal</div>
+                                <div style="font-size: 0.9em; color: #047857;">Z-score ≥ -2.0</div>
+                            </div>
+                            <div style="background: #fef3c7; border-radius: 8px; padding: 14px; border-left: 4px solid #f59e0b;">
+                                <div style="font-weight: 600; color: #92400e;">Moderate</div>
+                                <div style="font-size: 0.9em; color: #b45309;">-3.0 ≤ Z-score < -2.0</div>
+                            </div>
+                            <div style="background: #fee2e2; border-radius: 8px; padding: 14px; border-left: 4px solid #ef4444;">
+                                <div style="font-weight: 600; color: #991b1b;">Severe</div>
+                                <div style="font-size: 0.9em; color: #b91c1c;">Z-score < -3.0</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('modelInfo').innerHTML = html;
+            } catch (error) {
+                showError('modelInfo', 'Error loading model info: ' + error.message);
+            }
+        }
+        
+
+        function showError(elementId, message) {
+            document.getElementById(elementId).innerHTML = `<div class="error"> ${message}</div>`;
+        }
+
+        // Keyboard navigation for batch view
+        document.addEventListener('keydown', function(e) {
+            // Only handle if batch tab is active and we have predictions
+            const batchTab = document.getElementById('batch');
+            if (!batchTab.classList.contains('active') || batchPredictions.length === 0) return;
+            
+            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                navigateBatch(-1);
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                navigateBatch(1);
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                jumpToBatchItem(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                jumpToBatchItem(batchPredictions.length - 1);
+            }
+        });
+    </script>
+</body>
+</html>
